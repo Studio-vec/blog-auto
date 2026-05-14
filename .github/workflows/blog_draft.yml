@@ -37,21 +37,9 @@ jobs:
           echo "POST_DAYS=MON,WED,FRI" >> .env
           echo "POST_TIME=09:00" >> .env
 
-      # 이전 실행에서 저장한 로그인 세션 복원
+      # GitHub Secret에서 세션 복원 (카카오 재로그인 불필요)
       - name: 티스토리 세션 복원
-        uses: actions/cache@v4
-        with:
-          path: tistory_session
-          key: tistory-session-${{ github.run_id }}
-          restore-keys: tistory-session-
+        run: echo "${{ secrets.TISTORY_SESSION }}" | base64 -d > tistory_session
 
       - name: 비공개 글 저장 실행
         run: python main.py --draft
-
-      # 갱신된 세션 캐시 저장 (다음 실행에서 재사용)
-      - name: 티스토리 세션 캐시 저장
-        if: always()
-        uses: actions/cache@v4
-        with:
-          path: tistory_session
-          key: tistory-session-${{ github.run_id }}
