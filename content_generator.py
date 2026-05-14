@@ -34,6 +34,11 @@ def _build_prompt(topic: dict) -> str:
     vibe = topic.get("vibe", "")
     photo_points = topic.get("photo_points", [])
     photo_hint = "\n".join(f"  - {p}" for p in photo_points) if photo_points else "  - 없음"
+    best_time = topic.get("best_time", "")
+    experience = topic.get("experience", "")
+
+    best_time_line = f"방문 최적 시기: {best_time}\n" if best_time else ""
+    experience_line = f"커플 체험 활동 (반드시 본문에 포함할 것):\n  - {experience}\n" if experience else ""
 
     return f"""다음 국내 여행지에 대한 블로그 여행 후기를 작성해줘.
 독자: 20~40대 여성 + 커플 여행 계획 중인 남성
@@ -42,9 +47,9 @@ def _build_prompt(topic: dict) -> str:
 여행지: {place_desc}
 여행 형태: {trip_type}
 감성 키워드: {vibe}
-핵심 포토존 (반드시 본문에 포함할 것):
+{best_time_line}핵심 포토존 (반드시 본문에 포함할 것):
 {photo_hint}
-관련 키워드: {hint_tags}
+{experience_line}관련 키워드: {hint_tags}
 
 아래 형식을 정확히 따라서 작성해줘:
 
@@ -55,18 +60,32 @@ def _build_prompt(topic: dict) -> str:
 [본문]:
 1. 인트로 (여행 배경과 설레는 감정 2~3문장 — 커플 또는 여성 솔로 여행자 시점)
 2. [📸 사진] + 여행지 소개 (2023~2025년 현재 분위기, 왜 지금 핫한지)
-3. 📸 포토존 & 감성 스팟 (최소 3곳 — 찍는 각도·시간대·구도 팁 포함, 인스타 감성 강조)
-4. 🗺️ 추천 코스 (시간대별 동선, 커플 기준으로 구체적으로)
-5. 🍽️ 맛집 추천 (2~3곳 — 메뉴·가격·분위기·인스타 감성 여부 포함)
-6. ☕ 힙한 카페 추천 (1~2곳 — 인테리어·시그니처 메뉴·포토존 여부 포함)
-7. 🏨 숙소 추천 (뷰 좋거나 감성 있는 곳 위주, 가격대 포함)
-8. 💡 여행 꿀팁 (혼잡 시간대·주차·예약 필수 여부·커플 추천 포인트 등)
-9. 마무리 (설레는 여운이 남는 마무리)
+3. 📅 언제 가면 가장 예쁠까? (방문 최적 시기·계절별 차이, 비수기 꿀팁 포함)
+4. 📸 포토존 & 감성 스팟 (최소 3곳 — 찍는 각도·시간대·구도 팁 포함, 인스타 감성 강조)
+5. 🎯 커플 체험 (1~2시간 이상 함께 즐기는 체험 활동 — 예약 방법·가격·소요시간·후기 포인트 포함)
+6. 🗺️ 추천 코스 (시간대별 동선, 커플 기준으로 구체적으로)
+7. 🍽️ 맛집 추천 (2~3곳 — 메뉴·가격·분위기·인스타 감성 여부 포함)
+8. ☕ 힙한 카페 추천 (1~2곳 — 인테리어·시그니처 메뉴·포토존 여부 포함)
+9. 🏨 숙소 추천 (뷰 좋거나 감성 있는 곳 위주, 가격대 포함)
+10. 💡 여행 꿀팁 (혼잡 시간대·주차·예약 필수 여부·커플 추천 포인트 등)
+11. 마무리 (설레는 여운이 남는 마무리)
 
 [해시태그]: 15개 이상 (#국내여행 #커플여행 #포토스팟 #감성여행 #여행스타그램 등 포함)
 ---
 
 실제 블로그처럼 자연스럽고 생생하게 써줘."""
+
+
+_CTA_HTML = """
+<div style="margin: 40px 0; padding: 24px 28px; background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%); border-left: 4px solid #4a9eff; border-radius: 12px;">
+  <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: 700; color: #1a6fc4;">📍 코스 짜기 귀찮을 때, 그냥 따라오세요!</p>
+  <p style="margin: 0 0 12px 0; font-size: 14px; color: #444; line-height: 1.6;">제가 직접 다녀온 국내 여행 코스만 모아둔 곳이에요. 동선·맛집·포토존까지 그대로 따라가면 되는 코스를 정리해뒀으니, 여행 계획 세우기 복잡하다면 한번 들러보세요 🗺️</p>
+  <a href="https://huihui-travel.vercel.app/" target="_blank" rel="noopener noreferrer"
+     style="display: inline-block; padding: 10px 20px; background: #4a9eff; color: #fff; font-size: 14px; font-weight: 600; border-radius: 8px; text-decoration: none;">
+    👉 내가 직접 짠 여행 코스 보러 가기
+  </a>
+</div>
+"""
 
 
 def generate_post(topic: dict | None = None) -> dict:
@@ -85,6 +104,7 @@ def generate_post(topic: dict | None = None) -> dict:
 
     raw = message.content[0].text
     title, body, tags = _parse_response(raw)
+    body = body + _CTA_HTML
 
     return {
         "title": title,
