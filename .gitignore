@@ -1,0 +1,4 @@
+.env
+tistory_session
+__pycache__/
+*.pyc

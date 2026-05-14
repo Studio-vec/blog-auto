@@ -1,0 +1,54 @@
+name: 블로그 자동 비공개 저장
+
+on:
+  schedule:
+    # 매주 월·수·금 오전 9시 (KST) = UTC 00:00
+    - cron: '0 0 * * 1,3,5'
+  workflow_dispatch:   # 수동 실행 버튼
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: Playwright 브라우저 설치
+        run: playwright install chromium --with-deps
+
+      - name: .env 파일 생성
+        run: |
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env
+          echo "TISTORY_BLOG_NAME=${{ secrets.TISTORY_BLOG_NAME }}" >> .env
+          echo "KAKAO_ID=${{ secrets.KAKAO_ID }}" >> .env
+          echo "KAKAO_PW=${{ secrets.KAKAO_PW }}" >> .env
+          echo "POST_DAYS=MON,WED,FRI" >> .env
+          echo "POST_TIME=09:00" >> .env
+
+      # 이전 실행에서 저장한 로그인 세션 복원
+      - name: 티스토리 세션 복원
+        uses: actions/cache@v4
+        with:
+          path: tistory_session
+          key: tistory-session-${{ github.run_id }}
+          restore-keys: tistory-session-
+
+      - name: 비공개 글 저장 실행
+        run: python main.py --draft
+
+      # 갱신된 세션 캐시 저장 (다음 실행에서 재사용)
+      - name: 티스토리 세션 캐시 저장
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: tistory_session
+          key: tistory-session-${{ github.run_id }}

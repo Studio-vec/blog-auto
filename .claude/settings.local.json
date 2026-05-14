@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:blog.naver.com)",
+      "PowerShell(if \\(-not $?\\) { \"Directory empty or doesn't exist\" })",
+      "Bash(python main.py --tistory)",
+      "Bash(python debug_editor.py)",
+      "Bash(python debug_publish.py)",
+      "Bash(del debug_editor.py debug_publish.py)",
+      "Bash(python main.py --draft)",
+      "Bash(python debug_draft.py)",
+      "Bash(python debug_content.py)",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\kty12\\\\OneDrive\\\\Desktop\\\\blog\\\\.github\\\\workflows\")"
+    ]
+  }
+}
