@@ -43,3 +43,15 @@ jobs:
 
       - name: 비공개 글 저장 실행
         run: python main.py --draft
+
+      # 성공 시 갱신된 세션을 Secret에 덮어쓰기 (세션 만료 방지)
+      - name: 티스토리 세션 갱신 저장
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -f tistory_session ]; then
+            SESSION_B64=$(base64 -w 0 tistory_session)
+            gh secret set TISTORY_SESSION --body "$SESSION_B64" --repo ${{ github.repository }}
+            echo "세션 Secret 갱신 완료"
+          fi

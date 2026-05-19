@@ -30,14 +30,10 @@ def run_post(draft: bool = True) -> None:
         return
 
     print(f"\n🚀 티스토리 {mode_label} 중...")
-    try:
-        from tistory_poster import post as tistory_post
-        result = tistory_post(post["title"], post["body"], post["tags"], draft=draft)
-        icon = "📝" if draft else "✅"
-        print(f"{icon} 티스토리 {mode_label}: {result['url']}")
-    except Exception as e:
-        print(f"❌ 티스토리 오류: {e}")
-
+    from tistory_poster import post as tistory_post
+    result = tistory_post(post["title"], post["body"], post["tags"], draft=draft)
+    icon = "📝" if draft else "✅"
+    print(f"{icon} 티스토리 {mode_label}: {result['url']}")
     print("=" * 50)
 
 
